@@ -1,0 +1,13 @@
+from kb_service.kb_config import (  # noqa: F401
+    API_HOST,
+    API_PORT,
+    DEFAULT_DIR,
+    FEWSHOT_COLLECTION,
+    GLOSSARY_COLLECTION,
+    MYSQL_DATABASE,
+    MYSQL_HOST,
+    MYSQL_PASSWORD,
+    MYSQL_PORT,
+    MYSQL_USER,
+    QA_KB_COLLECTION,
+)

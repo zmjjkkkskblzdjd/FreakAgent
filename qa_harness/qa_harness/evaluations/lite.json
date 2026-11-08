@@ -1,0 +1,656 @@
+{
+  "timestamp": "2026-09-18T05:20:37.013788+00:00",
+  "model": "glm-4.6v",
+  "total_questions": 20,
+  "error_count": 3,
+  "route_accuracy": 0.9412,
+  "route_by_group": {
+    "lite": 0.9412
+  },
+  "tier_accuracy": 1.0,
+  "tier_escalation_rate": 0.0,
+  "tier_downgrade_rate": 0.0,
+  "tier_by_group": {
+    "lite": 1.0
+  },
+  "refusal_accuracy": 0.8235,
+  "false_positive_rate": 0.1765,
+  "false_negative_rate": 0.0,
+  "citation_rate": 0.8824,
+  "source_recall_at_5": 0.0882,
+  "group_counts": {
+    "lite": 20
+  },
+  "questions": [
+    {
+      "question": "re.search 方法是做什么的？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "re.search"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": true,
+      "actual_confidence": "low",
+      "actual_citations": [
+        "39bd5a01ed08e1100cc74c772d16686d"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\re库search方法作用说明.md"
+      ],
+      "answer": "已尝试检索词：re.search\n无法回答：因为没有可用的chunk_id来调用get_chunk工具获取相关信息，无法从知识库中检索到关于re.search方法的具体信息。\n建议补充资料：请提供包含re.search方法相关信息的chunk_id，或者提供具体的文档片段。",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": false,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "re.search 和 re.match 有什么区别？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "re.search",
+        "re.match"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "58037b0aaa396bf86279d8c2e0d74153"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\re库search方法作用说明.md"
+      ],
+      "answer": "re.search 和 re.match 的主要区别在于匹配的位置范围：\n\n- `re.search`：在整个字符串的**任意位置**查找第一个匹配项 [1]\n- `re.match`：只从字符串的**开头**进行匹配 [1]\n\n简单来说，re.search 可以在字符串的任何位置找到匹配，而 re.match 只检查字符串是否以匹配模式开头。\n\n参考来源：\n[1] re库search方法作用说明.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "@dataclass 装饰器有什么用？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "dataclass"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "14a9f68fde97e1bee9db6af01868483b",
+        "8243a256dc74d866a180585978b9a828",
+        "0ddb047aaca1c4aeef8ed4e9c818fa16",
+        "62ebd4a70cde20ccb2abd3aaaf0ce9b0"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md"
+      ],
+      "answer": "`@dataclass` 是 Python 的数据类装饰器（来自 `dataclasses` 模块），主要用来**简化「主要用于存储数据」的类的编写**。它会自动根据类属性注解生成 `__init__`、`__repr__`、`__eq__` 等方法 [1]。\n\n`@dataclass` 根据类定义自动生成了 `__init__`，它会根据类属性注解自动生成初始化方法 [2]。\n\n具体来说，`@dataclass` 自动生成的代码等价于：\n\n```python\ndef __init__(self, content, source, priority=5, relevance_score=1.0, ...):\n    self.content = content\n    self.source = source        # 直接赋值，不做类型校验\n    self.priority = priority\n    ...\n```\n\n所以运行时你**理论上可以传任何值**，因为类型注解只是约定，不是强制绑定 [3]。\n\n例如：\n```python\nfrom dataclasses import dataclass\n\n@dataclass\nclass ContextBudget:\n    total_input_tokens: int\n    available_for_output: int\n    is_within_budget: bool\n    utilization: float\n```\n\n这样的类定义会自动生成相应的初始化方法 [4]。\n\n参考来源：\n[1] 了解 @dateclasss 用途.md\n[2] 了解 @dateclasss 用途.md\n[3] 了解 @dateclasss 用途.md\n[4] 了解 @dateclasss 用途.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "@dataclass 的 field(default_factory) 是用来解决什么问题的？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "dataclass"
+      ],
+      "actual_route": null,
+      "actual_tier": null,
+      "actual_refusal": null,
+      "actual_confidence": null,
+      "actual_citations": [],
+      "actual_sources": [],
+      "answer": "[系统超时] 超过最大循环次数，任务仍未完成。可以把任务描述得更具体一点再重试。",
+      "error": true,
+      "error_msg": "超过最大循环次数，任务仍未完成。可以把任务描述得更具体一点再重试。",
+      "route_correct": false,
+      "tier_correct": false,
+      "refusal_correct": false,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": false
+    },
+    {
+      "question": "什么是面包屑处理？它在文档分割中有什么用？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "面包屑"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "e6b823d7c896b93121cb9495ba09d22e",
+        "65522d1764eeb81b8cf7b790c3e94178",
+        "a0e49c9a3c14b064cf5438cae41fd833",
+        "80cc1db36bcce0ecc33309bb97f07e50"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md"
+      ],
+      "answer": "**面包屑处理**借用童话《汉塞尔与格蕾特》中撒面包屑寻路的故事，在 Web 导航中常见：`首页 > 产品 > 电子 > 手机`，用来表示当前位置在层级结构中的路径 [1]。\n\n在文档分割中，面包屑处理具有以下重要作用：\n\n1. **保留层级语境**：解决「语义上下文丢失」问题。原文本中某段话归属在特定标题下，切分后单独看这句话就失去归属感。面包屑让检索器和 LLM 都知道这段在讲「Python 入门指南 > Python 的特点」等完整路径 [2]。\n\n2. **提升检索召回质量**：嵌入向量生成时能看到标题上下文，语义检索时与查询的相关性更准确 [2]。\n\n3. **辅助生成回答**：LLM 引用片段时能直接给出「在第 X 章第 Y 节中」这种结构化引用，回答更可解释 [2]。\n\n4. **抗歧义**：同一句话出现在不同章节下含义不同，面包屑能区分。例如「Python 具有动态类型」在不同章节可能有不同含义 [2]。\n\n**工作机制**包括：\n- **维护标题栈**：遇到 `#` 标题时，根据 `level` 截断并更新 `current_headers` 列表，只保留当前层级路径上的祖先标题 [3]。\n- **生成面包屑路径**：在切割每个内容块前，把当前所有祖先标题用 `\" > \"` 拼接，作为该块的前缀 [3][4]。\n\n参考来源：\n[1] 分析分割文档.py中的面包屑处理.md\n[2] 分析分割文档.py中的面包屑处理.md\n[3] 分析分割文档.py中的面包屑处理.md\n[4] 分析分割文档.py中的面包屑处理.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "选择 chunk 大小有哪些判定方法？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "chunk",
+        "面包屑"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "1dbfbf8d92e79c5e2b0ed1ddbc8b31d0",
+        "4c75d44908ed037d0511401f25590739",
+        "e01ae76cbe743db372e55a6597bd4de2",
+        "b6605ea6d0f038fd0c9bda76c4b6b89b",
+        "0f08d0332b8035c32e4485eab5a55d36"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md"
+      ],
+      "answer": "选择chunk大小有系统性的判定方法，没有一刀切的最佳值，主要包括以下几个维度：\n\n1. **由检索粒度决定** [1]：\n   - 事实型问答（\"X 是什么\"）→ 小chunk（200~300字符）：精准命中\n   - 论述型问答（\"对比 A 和 B\"）→ 大chunk（800~1200字符）：保留完整论证\n   - 代码/API文档 → 按函数/类边界切割，不按字符数\n\n2. **由LLM上下文窗口反推** [2]：\n   可用chunk总预算 ≈ (LLM上下文 - Prompt模板 - 用户问题 - 输出预留) / 2\n   单chunk大小 ≈ 总预算 / top_k\n   例如：GPT-4.1-mini（1M上下文）、top_k=5 → 单chunk可放宽到2000+字符；如果用4K上下文小模型、top_k=3 → 单chunk应控制在800字符内\n\n3. **经验起点值** [3]：\n   - 通用文本：chunk_size=500, overlap=50\n   - 法律/合同：chunk_size=800, overlap=100\n   - 聊天记录：chunk_size=200, overlap=30\n   - 代码：按函数边界切割，overlap=0\n   - Markdown：按标题切割，overlap=0\n\n4. **量化评估方法（最可靠）** [4]：\n   用一组带标准答案的QA测试集跑检索评测，对比不同chunk_size的指标：\n   - 检索质量：Recall@k、MRR（平均倒数排名）\n   - 生成质量：Faithfulness、Answer Relevance\n   - 成本：嵌入调用次数、LLM Token消耗\n   调参路径：先固定overlap=10%×chunk_size，扫chunk_size ∈ {200, 400, 600, 800, 1000}，看Recall@5曲线拐点\n\n5. **overlap的作用** [5]：\n   - 防止把\"答案+证据\"切到两个chunk中间\n   - overlap一般取chunk_size的10%~20%\n   - 太大 → 嵌入冗余、检索重复；太小 → 跨块语义断裂\n\n实用建议：先用chunk_size=500, chunk_overlap=50跑通流水线，再准备20~50条QA评测集做对比实验，看Recall@5拐点定位最优值\n\n参考来源：\n[1] 分析分割文档.py中的面包屑处理.md\n[2] 分析分割文档.py中的面包屑处理.md\n[3] 分析分割文档.py中的面包屑处理.md\n[4] 分析分割文档.py中的面包屑处理.md\n[5] 分析分割文档.py中的面包屑处理.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "tiktoken 库怎么用？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "tiktoken"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "03a1b7a945c4eb79183b64b2538cc0bb",
+        "4441bbd05033464e20bc10a590c78597",
+        "a10cb029ffcf4b3f4299e2a2f031ec2b",
+        "6c489fe9f40000671a5df672a8c463b3"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\检查滑动窗口Python文件问题.md",
+        "qa_harness\\data\\docs\\检查滑动窗口Python文件问题.md",
+        "qa_harness\\data\\docs\\检查滑动窗口Python文件问题.md",
+        "qa_harness\\data\\docs\\检查滑动窗口Python文件问题.md",
+        "qa_harness\\data\\docs\\检查滑动窗口Python文件问题.md"
+      ],
+      "answer": "已尝试检索词：tiktoken\n无法回答：当前没有可用的 tiktoken 库相关证据资料，无法提供 tiktoken 库的使用方法。\n建议补充资料：请提供 tiktoken 库的文档、教程或使用示例等资料。",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "智谱的 tokenizer 接口收费吗？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "tokenizer"
+      ],
+      "actual_route": "web",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "963527a302b15bf941a9c7e505cd414c"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\检查滑动窗口Python文件问题.md"
+      ],
+      "answer": "智谱的 tokenizer 接口是免费的，不扣费 [1]。\n\n原因：\n- tokenizer 只做分词计算，不调用大模型推理 [1]\n- 计费基于模型推理（chat/completions），分词是基础工具服务 [1]\n- 官方文档明确把它归类为\"文本评估\"工具，用于费用预估的前置步骤 [1]\n\n所以你可以放心调用 `POST /api/paas/v4/tokenizer`，不会产生费用 [1]。\n\n参考来源：\n[1] 检查滑动窗口Python文件问题.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": false,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "语义过滤和 RAG 有什么区别？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "语义过滤",
+        "RAG"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "fb90b707cfe39d9be3af6e6ca42ae25a",
+        "e0854b183856fd95f083395ae494f8de",
+        "95ec2a9a00f8e5f7d13541d49044b003",
+        "0f50f18274643c6d6f5bef4e07fc7308"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md"
+      ],
+      "answer": "语义过滤和 RAG 的区别主要体现在以下几个方面：\n\n**1. 数据源不同**\n语义过滤处理的是**当前上下文窗口内的历史对话**，而 RAG 处理的是**外部知识库**（文档、向量库）[2]。\n\n**2. 操作目的不同**\n语义过滤是从**已有的**历史中按相关性**筛选**，目的是在窗口预算不够时决定**丢谁**；RAG 是从**外部**知识中按相关性**召回**，目的是回答问题时决定**补什么进来**[2]。\n\n**3. 输入量级不同**\n语义过滤的输入量有限（窗口内已有的几十/几百条消息），而 RAG 的输入量巨大（知识库中几万/几十万文档）[2]。\n\n**4. 工作阶段不同**\n语义过滤是**上下文窗口内部**的过滤技术，属于三大上下文窗口管理技术之一（和滑动窗口、摘要压缩并列），纯粹是\"窗口内部的瘦身优化\"；而 RAG 是上下游不同阶段的事，涉及外部知识库检索[1][3]。\n\n**5. 记忆系统关系**\n语义过滤处理的是**短期/中期记忆**（已经在窗口里的对话历史），而\"从长期记忆提取\"是 RAG 或记忆系统检索做的事——把外部信息**拉进**窗口[4]。\n\n**一句话总结**：语义过滤 = 在上下文窗口内，用 embedding 从已有的历史对话中挑出和当前问题最相关的那些，丢掉不相关的；它不涉及外部知识库检索，也不涉及长期记忆系统[3]。\n\n参考来源：\n[1] 了解 @dateclasss 用途.md\n[2] 了解 @dateclasss 用途.md\n[3] 了解 @dateclasss 用途.md\n[4] 了解 @dateclasss 用途.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "为什么组装消息时要按 turn_index 升序排序？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "上下文",
+        "消息组装"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "81fc1aeb173d2c778970846f6642c6b7",
+        "4134843cf3da9b061f5688951010d26f",
+        "b6fa44ea72e359a1613ea582c813482d"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md"
+      ],
+      "answer": "组装消息时按 turn_index 升序排序的原因是为了确保消息按时间先后顺序呈现给模型 [1][2][3]。\n\n在信息选择阶段，对话按 turn_index 降序排列（最新的在前），这是为了在预算紧张时优先保留最近的轮次 [1][2][3]。但如果直接使用这个顺序组装消息，会导致时间倒流：第9轮→第8轮→...→第5轮，这违反了LLM对消息顺序的要求 [1]。\n\nLLM要求消息必须严格按对话发生顺序排列（user/assistant交替、从旧到新），顺序错乱会导致模型理解颠倒、role交替也可能错位 [1]。因此组装时必须再排一次升序，把\"为了取舍而倒序\"恢复成\"为了呈现而正序\" [1][3]。\n\n这体现了筛选逻辑和呈现逻辑的分离：选择阶段降序回答\"留哪些\"，组装阶段升序回答\"怎么排\"，两者服务于不同目标，缺一不可 [3]。\n\n参考来源：\n[1] 了解 @dateclasss 用途.md\n[2] 了解 @dateclasss 用途.md\n[3] 了解 @dateclasss 用途.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "re.compile 的作用是什么？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "re.search"
+      ],
+      "actual_route": null,
+      "actual_tier": null,
+      "actual_refusal": null,
+      "actual_confidence": null,
+      "actual_citations": [],
+      "actual_sources": [],
+      "answer": "[系统超时] 超过最大循环次数，任务仍未完成。可以把任务描述得更具体一点再重试。",
+      "error": true,
+      "error_msg": "超过最大循环次数，任务仍未完成。可以把任务描述得更具体一点再重试。",
+      "route_correct": false,
+      "tier_correct": false,
+      "refusal_correct": false,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": false
+    },
+    {
+      "question": "Match 对象的 group() 方法返回什么？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "re.search"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "7786c4b1c98a1af62548de9da94e4e0d"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\re库search方法作用说明.md"
+      ],
+      "answer": "Match 对象的 group() 方法返回匹配的内容。具体来说：\n\n- `m.group()` 或 `m.group(0)`：返回整个匹配的内容\n- `m.group(1)`：返回第 1 个括号捕获组的内容\n- 以此类推，`m.group(n)` 返回第 n 个括号捕获组的内容\n\n例如，在正则表达式 `r\"step_summary:\\\\s*(\\\\w+)\"` 中：\n- `m.group(0)` 返回 `\"step_summary: ok\"`（整个匹配）\n- `m.group(1)` 返回 `\"ok\"`（第1个括号捕获组）\n\n参考来源：\n[1] re库search方法作用说明.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "dataclass 的 frozen 参数有什么用？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "dataclass"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "f640b6fcb043cea7e4022ef0238dfab0",
+        "07c1045c27db9fe413fa1b33e973b86a"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md",
+        "qa_harness\\data\\docs\\了解 @dateclasss 用途.md"
+      ],
+      "answer": "dataclass 的 `frozen` 参数用于创建不可变对象。当设置为 `frozen=True` 时，可以生成 hashable 的不可变对象 [1]。这种不可变对象的主要用途是作为字典的键或集合的元素，因为可哈希对象需要是不可变的 [2]。\n\n参考来源：\n[1] 了解 @dateclasss 用途.md\n[2] 了解 @dateclasss 用途.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "什么是语义切分？它和普通切分有什么不同？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "语义分割"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": true,
+      "actual_confidence": "low",
+      "actual_citations": [],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md"
+      ],
+      "answer": "已尝试检索词：语义切分、普通切分、文本分割\n\n为什么无法回答：根据提供的证据，文档主要讨论的是TextSplitter类的三种分割策略（按分隔符切割、按Token数量切割、按Markdown标题层级切割+面包屑），以及面包屑处理如何解决语义上下文丢失问题。但证据中没有明确提到'语义切分'这个术语，也没有直接对比'语义切分'和'普通切分'的定义和区别。\n\n建议补充资料：需要更多关于语义切分技术原理的详细信息，包括其明确定义、与普通切分的具体区别、以及相关的技术实现细节。",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": false,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": false
+    },
+    {
+      "question": "滑动窗口的 stride 参数是什么意思？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "滑动窗口"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": true,
+      "actual_confidence": "low",
+      "actual_citations": [],
+      "actual_sources": [],
+      "answer": "已尝试检索滑动窗口 stride 参数相关信息，但本轮检索没有返回任何片段，知识库中没有找到关于滑动窗口 stride 参数的具体解释。建议补充机器学习、深度学习或信号处理相关的技术文档，特别是涉及滑动窗口操作、卷积神经网络或时间序列分析的内容。",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": false,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": false
+    },
+    {
+      "question": "BM25 算法的基本思想是什么？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "BM25"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "10779cbecf07764c9a474f9e04bec5cc",
+        "d53c3078faf2481a9904345bdcf14be7",
+        "297a97739a916ee6fd437494efe56246"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md"
+      ],
+      "answer": "BM25算法的基本思想可以概括为：\"看每个查询词在文档里出现了几次，但稀有词命中价值更高（IDF），同时惩罚长文档（长度归一化）\"[3]。\n\nBM25算法的核心公式为：\n$$\\text{BM25}(d, q) = \\sum_{t \\in q} \\text{IDF}(t) \\cdot \\frac{f(t,d) \\cdot (k_1+1)}{f(t,d) + k_1 \\cdot (1 - b + b \\cdot |d|/avgdl)}$$[2][1]\n\n其主要组件包括：\n- `IDF(t)` - 词 t 在多少文档出现过，越稀有越值钱（如\"FastAPI\"比\"是\"分高）[1]\n- `f(t, d)` - 词 t 在文档 d 出现次数，出现越多分越高，但有饱和效应[1]\n- `|d| / avgdl` - 文档长度归一化，长文档被惩罚（避免长文档因字数多而占便宜）[1]\n- `k_1=1.5` - 词频饱和参数，控制词频增长曲线[1]\n- `b=0.75` - 长度归一化强度，0=不归一化，1=完全归一化[1]\n\nBM25算法与向量检索不同，它主要找\"字面相同\"的内容，而非\"意思相近\"的内容[3]。\n\n参考来源：\n[1] 分析分割文档.py中的面包屑处理.md\n[2] 分析分割文档.py中的面包屑处理.md\n[3] 分析分割文档.py中的面包屑处理.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "向量检索的相似度是怎么计算的？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "向量检索"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "high",
+      "actual_citations": [
+        "e5ead2dc1b5864511bedffce29b58e38",
+        "ac81e35058d9fc99d6391c28c0c06c42",
+        "d47e4f5b0aea02344f9de8c71d7c47a1"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\分析agent_learning项目内容.md",
+        "qa_harness\\data\\docs\\检查滑动窗口Python文件问题.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "https://blog.csdn.net/baidu_38225647/article/details/160801176",
+        "https://zhuanlan.zhihu.com/p/2025993154034155884"
+      ],
+      "answer": "向量检索的相似度计算主要通过余弦距离转换而来。在ChromaDB中，使用的是**余弦距离**（cosine distance），其计算公式为：\n\n```python\nrelevance = 1 - dist\n```\n\n其中：\n- `dist` 表示余弦距离，值越小表示越相似\n- `relevance` 表示相似度，值越大表示越相关\n\n两者的关系是：`距离 = 1 - 相似度`，反过来就是 `相似度 = 1 - 距离` [1][2]。\n\nChromaDB的余弦距离范围是 `[0, 2]`，对应的相似度范围是 `[-1, 1]`。当向量方向相反时，相似度可能为负值 [3]。\n\n具体的对应关系如下：\n\n| 距离 dist | 相似度 1-dist | 含义 |\n|---|---|---|\n| 0.0 | 1.0 | 完全相同 |\n| 0.2 | 0.8 | 很相似 |\n| 0.3 | 0.7 | 很相关 |\n| 0.5 | 0.5 | 一般相关/一半相关 |\n| 1.0 | 0.0 | 完全无关 |\n\n这种转换是为了符合人类直觉，即\"相关性越高越好\"的认知习惯 [1][2]。\n\n参考来源：\n[1] 分析agent_learning项目内容.md\n[2] 检查滑动窗口Python文件问题.md\n[3] 分析分割文档.py中的面包屑处理.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "知识库的灌库流程有哪些步骤？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "灌库"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "medium",
+      "actual_citations": [
+        "d24dd5728bc3ecbfdeded7671ec4ebfc",
+        "20d26cd4d5d0bbfbcedb7ebf5961d4d9",
+        "6359bd256f0566d91005ba0f3d389aaa"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md"
+      ],
+      "answer": "知识库的灌库流程主要包括以下步骤：\n\n1. **防重复灌库检查**：灌库前检查某个文件是否已经进过库，使用 `list_sources()` 方法检查来源是否已存在，如果存在则跳过该文件的完整灌库流程 [1]。\n\n2. **文档加载**：从文件加载文档时调用 `documents_to_index_documents` 方法 [2]。\n\n3. **文档分割**：系统自动将文档分割成多个 chunk，例如\"字符分割：1 个 Chunk\"，然后进行\"总计 245 个 Chunk，开始索引...\" [2]。\n\n4. **嵌入处理**：对分割后的文档进行嵌入处理，如\"正在嵌入 245 个文档...\"，同时加载嵌入模型（如 BAAI--bge-small-zh-v1.5）[2]。\n\n5. **向量存储**：通过 `index_documents_to_vectorstore` 方法将处理后的文档添加到向量存储中，该方法会自动级联调用 `add_documents` [2]。\n\n6. **非文件来源处理**：对于来自 API、数据库、爬虫等非文件来源的文档，可以直接调用 `store.index_documents_to_vectorstore(docs)` 跳过加载步骤，直接进行分割和入库 [3]。\n\n整个流程中，三个核心方法形成\"套娃\"关系：`documents_to_index_documents` → `index_documents_to_vectorstore` → `add_documents`，越外层方法功能越完整 [2]。\n\n参考来源：\n[1] 分析分割文档.py中的面包屑处理.md\n[2] 分析分割文档.py中的面包屑处理.md\n[3] 分析分割文档.py中的面包屑处理.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    },
+    {
+      "question": "什么是倒排索引？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "BM25"
+      ],
+      "actual_route": null,
+      "actual_tier": null,
+      "actual_refusal": null,
+      "actual_confidence": null,
+      "actual_citations": [],
+      "actual_sources": [],
+      "answer": "[系统超时] 超过最大循环次数，任务仍未完成。可以把任务描述得更具体一点再重试。",
+      "error": true,
+      "error_msg": "超过最大循环次数，任务仍未完成。可以把任务描述得更具体一点再重试。",
+      "route_correct": false,
+      "tier_correct": false,
+      "refusal_correct": false,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": false
+    },
+    {
+      "question": "ChromaDB 是什么类型的数据库？",
+      "group": "lite",
+      "expected_route": "kb",
+      "expected_tier": "lite",
+      "expected_refusal": false,
+      "expected_citation_sources": [
+        "向量数据库"
+      ],
+      "actual_route": "kb",
+      "actual_tier": "lite",
+      "actual_refusal": false,
+      "actual_confidence": "medium",
+      "actual_citations": [
+        "e8d3841b21a05f3da990d24ebb2683be",
+        "f476f7b02197ffdee7fc495155fcfeec"
+      ],
+      "actual_sources": [
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md",
+        "qa_harness\\data\\docs\\分析分割文档.py中的面包屑处理.md"
+      ],
+      "answer": "根据证据，ChromaDB 是一个**嵌入式数据库**，底层架构由 **SQLite + DuckDB + HNSW 索引**组成 [1]。它本质上是一个嵌入式数据库，定位类似于 SQLite，不需要独立的服务进程 [1]。从表结构可以看出，ChromaDB 是一个专门用于存储向量数据的数据库，包含 id、embedding（向量）、document（文档内容）和 metadata（元数据）等字段 [3]。\n\n参考来源：\n[1] 分析分割文档.py中的面包屑处理.md\n[2] 分析分割文档.py中的面包屑处理.md",
+      "error": false,
+      "error_msg": "",
+      "route_correct": true,
+      "tier_correct": true,
+      "refusal_correct": true,
+      "citation_hit": null,
+      "source_recall": 0.0,
+      "has_citations": true
+    }
+  ]
+}

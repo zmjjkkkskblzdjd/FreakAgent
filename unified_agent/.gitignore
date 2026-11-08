@@ -1,0 +1,14 @@
+# unified_agent 包内忽略规则（Day 1 建）
+# 运行时数据（chroma / memory db 等）与字节缓存一律不入库；密钥永不入库
+data/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+logs/
+*.log
+.env
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

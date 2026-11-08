@@ -1,0 +1,20 @@
+# Keep Windows entry scripts parseable across editors.
+# - .bat/.cmd: cmd.exe requires CRLF; keep ASCII-only text inside them.
+# - .ps1: Windows PowerShell 5.1 needs UTF-8 with exactly one BOM (utf-8-bom),
+#   stacked BOMs break param() parsing.
+root = true
+
+[*.bat]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+
+[*.cmd]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+
+[*.ps1]
+charset = utf-8-bom
+end_of_line = crlf
+insert_final_newline = true

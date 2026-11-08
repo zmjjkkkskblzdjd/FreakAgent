@@ -1,0 +1,74 @@
+
+:root {
+  --bg-base: #ffffff;
+  --bg-elevated: #f6f8fa;
+  --bg-hover: #eef3f6;
+  --bg-active: #e3ecef;
+  --border: #e3e8ec;
+  --border-strong: #d4dbe0;
+
+  --text-primary: #1f2a33;
+  --text-secondary: #5b6b75;
+  --text-muted: #9aa7af;
+
+  --accent: #13b5b1;
+  --accent-hover: #0fa3a0;
+  --accent-soft: #e6f7f6;
+  --accent-contrast: #ffffff;
+
+  --success: #2bb673;
+  --warning: #f5a623;
+  --danger: #e0584f;
+
+  --user-bubble: #e6f7f6;
+  --assistant-bubble: #f6f8fa;
+
+  
+  --sidebar-w: 48px;
+  --secondary-w: 264px;
+  --topbar-h: 52px;
+  --input-h: 96px;
+
+  
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+
+  
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+
+  
+  --shadow-sm: 0 1px 2px rgba(31, 42, 51, 0.06);
+  --shadow: 0 4px 14px rgba(31, 42, 51, 0.08);
+  --shadow-lg: 0 12px 32px rgba(31, 42, 51, 0.12);
+
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.dark {
+  --bg-base: #181b1e;
+  --bg-elevated: #23272b;
+  --bg-hover: #2c3136;
+  --bg-active: #353a40;
+  --border: #353a40;
+  --border-strong: #444a51;
+
+  --text-primary: #e6eaed;
+  --text-secondary: #aab2b8;
+  --text-muted: #6c757c;
+
+  --accent-soft: rgba(19, 181, 177, 0.16);
+  --accent-contrast: #0d1b1a;
+
+  --user-bubble: rgba(19, 181, 177, 0.16);
+  --assistant-bubble: #23272b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+}

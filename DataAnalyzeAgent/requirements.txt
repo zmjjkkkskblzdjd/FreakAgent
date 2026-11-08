@@ -1,0 +1,49 @@
+# ============================================================
+# DataAnalyzeAgent 依赖清单
+# 安装（在已激活的虚拟环境中）：
+#   python -m pip install -r requirements.txt
+# 注意：sqlglot 方言解析差异大，升级版本前必须重跑 tests/test_guard.py（构建路线 D4 教训）
+#
+# 2026-10 ClickHouse 重构：数据访问收口到读查询网关（独立 FastAPI 服务，HTTP），
+# 本进程不再直连数据库——SQLAlchemy/PyMySQL/cryptography/Faker（shop_demo 造数）已移除。
+# ============================================================
+
+# ---- LLM 与编排（LangChain + LangGraph）----
+langchain>=1.3
+langchain-openai>=1.0             # 【本环境缺】ChatOpenAI 指智谱兼容端点；不用社区版 ChatZhipuAI（60s 超时硬编码）
+langgraph>=1.2
+langgraph-checkpoint-sqlite>=2.0  # 【本环境缺】SqliteSaver checkpointer（独立包，容易漏装）
+
+# ---- 网关与指标匹配（HTTP 客户端）----
+httpx>=0.27                       # db/gateway.py（读查询网关）与 metrics/matcher.py（qa_harness stub）共用
+                                  # （mcp 依赖会间接带上，显式登记防漂移）
+
+# ---- SQL 安全闸门 ----
+sqlglot>=25.0                     # 【本环境缺】guard 的 AST 解析（ClickHouse 方言）；锁定后勿随意升级
+
+# ---- 指标字典 ----
+PyYAML>=6.0                       # metrics/dictionary.yaml 加载（当前由其他包间接带上，显式登记防漂移）
+
+# ---- 长期记忆（Chroma 独立库 da_memory；三卡 RAG 已退役：schema 走网关实时
+#      catalog、术语走指标字典、例题走 qa_harness HTTP stub）----
+chromadb>=0.4.24                  # 本环境已装 0.4.24
+posthog>=3,<4                     # 必须 pin：0.4.24 约束只写 posthog>=2.4 无上限，会解到 posthog 4+/7，
+                                  # 其 telemetry 用的 capture() 旧调用签名在 posthog 4+ 必抛异常刷
+                                  # "Failed to send telemetry event"；pin 3.x 后 anonymized_telemetry=False 才能真正静音
+sentence-transformers>=6.1        # 本环境已装 6.1.0（本地 bge-small-zh-v1.5 编码）；6.x 顶层 import 依赖 multiprocess 包
+multiprocess>=0.70                # sentence-transformers 6.x 经 datasets 的缺依赖，不装 import 即炸
+
+# ---- 数据校验 ----
+pydantic>=2.13                    # v2；仅跨 interrupt 边界的载荷用（注意是 @field_validator）
+
+# ---- 图表 ----
+numpy>=1.26,<2                    # 必须 pin <2：chromadb 0.4.24 的 api/types.py 用 np.float_，
+                                  # numpy 2.0 已删除该别名（2026-10-12 环境踩坑实录）
+matplotlib>=3.11
+
+# ---- .env 加载 ----
+python-dotenv>=1.2
+
+# ---- MCP 对外开门（D17，stdio / Streamable HTTP 双模）----
+mcp>=2.1                          # 2.x：FastMCP 更名 MCPServer；HTTP 传输依赖的
+                                  # uvicorn/starlette/httpx 由其自动带上（本环境 2.1.1）

@@ -1,0 +1,142 @@
+# ============================================================
+# 指标字典底稿（初始数据源；运行时不直接读取本文件）
+# —— 2026-10-13 起主存迁 MySQL sales_meta.kb_glossary（VM hadoop01:3306），
+#    经 query_gateway/scripts/sync_kb_to_ch.py 同步到 sales_dw.kb_glossary，
+#    agent 经读查询网关消费（TTL 缓存）。本文件保留为 seed_kb_mysql.py 的
+#    初始底稿 / 新环境初始化用。
+#
+# 三级匹配（不变）：
+#   用户问题 → 提取指标候选词
+#     1. 精确匹配 name（字典标准名）→ 命中直接用
+#     2. 精确匹配 aliases 别名表     → 映射到标准指标
+#     3. 语义检索 Glossary（qa_harness 向量库）→ 高置信映射 / 低置信澄清
+#
+# 维护纪律：
+# - 口径变更流程：改 MySQL（或改本底稿后重跑 seed_kb_mysql.py）→
+#   跑 sync_kb_to_ch.py → 最多 5 分钟（TTL）后 agent 生效；
+# - 每条指标必须有 name（标准名）、formula（ClickHouse 口径表达式）、
+#   related_tables（真实表/视图名，以 v_ 最新版本视图为准）；
+# - aliases 是用户嘴里的叫法，越全越好；与同义词表（glossary synonyms）保持一致，
+#   以 MySQL 主存为准；
+# - 枚举/状态口径（如"成交=completed"）必须写进 formula 或 note，禁止靠模型猜；
+# - 表结构或口径变更时同步更新 MySQL 主存；本底稿不进向量库、运行时不读取。
+# ============================================================
+
+domain: 销售经营
+database: sales_dw
+default_time_field: order_date        # 事实表时间字段（v_fact_sales_order_line）
+default_status_filter: "order_status = 'completed'"   # 成交口径默认过滤
+
+metrics:
+
+  - name: 成交额
+    aliases: [GMV, gmv, 销售额, 销售金额, 交易总额, 流水]
+    formula: "sum(sales_amount)，仅计 order_status='completed'"
+    related_tables: [v_fact_sales_order_line]
+    unit: 元
+    note: 已支付成交口径；含后续退货的原始成交（净额口径见"净成交额"）
+
+  - name: 净成交额
+    aliases: [净销售额, 净GMV]
+    formula: "sum(sales_amount) 仅计 completed - 退货单成交金额"
+    related_tables: [v_fact_sales_order_line]
+    unit: 元
+    note: 退货单 order_status='returned'，其 sales_amount 为退回金额
+
+  - name: 毛利
+    aliases: [毛利润, 利润, 毛利额]
+    formula: "sum(profit_amount)，仅计 order_status='completed'"
+    related_tables: [v_fact_sales_order_line]
+    unit: 元
+
+  - name: 毛利率
+    aliases: [利润率, 毛利水平]
+    formula: "sum(profit_amount) / sum(sales_amount)，仅计 completed"
+    related_tables: [v_fact_sales_order_line]
+    unit: "%"
+    note: 分母为成交额；不可对单行 ratio 取平均
+
+  - name: 订单量
+    aliases: [订单数, 单量, 成交单数, 订单总数]
+    formula: "uniqExact(order_id)，默认仅计 order_status='completed'"
+    related_tables: [v_fact_sales_order_line]
+    unit: 单
+    note: 一个订单有多行明细（line_no），计数必须 uniqExact(order_id) 而不是 count()
+
+  - name: 销量
+    aliases: [销售量, 销售件数, 件数, 货量]
+    formula: "sum(quantity)，仅计 order_status='completed'"
+    related_tables: [v_fact_sales_order_line]
+    unit: 件
+
+  - name: 客单价
+    aliases: [AOV, aov, 单均价, 平均订单金额]
+    formula: "sum(sales_amount) / uniqExact(order_id)，仅计 completed"
+    related_tables: [v_fact_sales_order_line]
+    unit: 元/单
+
+  - name: 退货率
+    aliases: [退款率, 退货占比]
+    formula: "uniqExactIf(order_id, order_status='returned') / uniqExact(order_id)"
+    related_tables: [v_fact_sales_order_line]
+    unit: "%"
+    note: 按订单口径；如需按金额口径用 sumIf(sales_amount, returned)/sum(sales_amount)
+
+  - name: 取消率
+    aliases: [取消占比]
+    formula: "uniqExactIf(order_id, order_status='cancelled') / uniqExact(order_id)"
+    related_tables: [v_fact_sales_order_line]
+    unit: "%"
+
+  - name: 客户数
+    aliases: [会员数, 用户数, 买家数]
+    formula: "成交客户数 uniqExact(customer_id)；存量客户 count() 于 v_dim_customer"
+    related_tables: [v_fact_sales_order_line, v_dim_customer]
+    unit: 人
+    note: 问"有多少客户"默认指存量客户总数（v_dim_customer 行数）
+
+  - name: 会员等级分布
+    aliases: [会员结构, 等级分布]
+    formula: "v_dim_customer 按 customer_level 分组 count()"
+    related_tables: [v_dim_customer]
+    unit: 人
+
+  - name: 动销商品数
+    aliases: [动销SKU, 在售商品数, 动销率]
+    formula: "uniqExactIf(product_id, order_status='completed')"
+    related_tables: [v_fact_sales_order_line]
+    unit: 个
+    note: 动销率 = 动销商品数 / v_dim_product 总商品数
+
+  - name: 同比
+    aliases: [YoY, yoy, 年同比, 同比增长]
+    formula: "(本期 / 去年同期 - 1)；CH 写法 neighbor(gmv,-1) 或自 JOIN 去年同月"
+    related_tables: [v_fact_sales_order_line]
+    unit: "%"
+    note: neighbor 首行无上年数据返回 0，需外层 WHERE prev > 0 过滤
+
+  - name: 环比
+    aliases: [MoM, mom, 月环比, 环比增长]
+    formula: "(本期 / 上期 - 1)；按月聚后 neighbor(gmv,-1)"
+    related_tables: [v_fact_sales_order_line]
+    unit: "%"
+
+  - name: 渠道占比
+    aliases: [渠道结构, 渠道分布]
+    formula: "按 channel 分组 sum(sales_amount) / 全量 sum(sales_amount)，completed"
+    related_tables: [v_fact_sales_order_line]
+    unit: "%"
+    note: channel 枚举：线上商城 / 线下门店 / 分销
+
+  - name: 品类销售
+    aliases: [品类成交额, 类目销售, 品类GMV]
+    formula: "v_fact_sales_order_line JOIN v_dim_product 按 category 分组 sum(sales_amount)"
+    related_tables: [v_fact_sales_order_line, v_dim_product]
+    unit: 元
+
+  - name: 区域销售
+    aliases: [城市销售, 大区销售, 区域成交额, 地域分布]
+    formula: "v_fact_sales_order_line JOIN v_dim_region 按 region_name/city 分组"
+    related_tables: [v_fact_sales_order_line, v_dim_region]
+    unit: 元
+    note: v_dim_region 含 region_name（大区）/province/city/city_tier 四级粒度

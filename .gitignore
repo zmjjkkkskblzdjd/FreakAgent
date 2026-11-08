@@ -1,0 +1,65 @@
+# ============================================================
+# AllFusion 统一仓库 .gitignore
+# 铁律：.env 永不入库（.env.example 作为模板除外）
+# ============================================================
+
+# ---- 密钥与环境 ----
+.env
+.env.*
+!.env.example
+
+# ---- SSH 运维执行器（含内联凭据，规定不进 git 跟踪）----
+query_gateway/scripts/ssh_exec.py
+
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# ---- 运行时数据 / 日志 ----
+# 注意：裸写 data/ 会连 cherry-ui/src/data（源码 mock）一起忽略，必须显式放行。
+# 另：.gitignore 不支持行尾注释，注释必须独立成行，否则整串会被当作模式匹配而失效。
+data/
+!cherry-ui/src/data/
+!cherry-ui/src/data/**
+DataAnalyzeAgent/DataAnalyzeAgent/data/
+DataAnalyzeAgent/DataAnalyzeAgent/logs/
+qa_harness/qa_harness/data/
+qa_harness/qa_harness/logs/
+query_gateway/logs/
+*.log
+
+# 评测产物 / 数据导出（体积大且含业务数据，不入库）
+outputs/
+*.parquet
+*.dump
+*.sql.gz
+
+# ---- 前端构建产物 ----
+node_modules/
+dist/
+dist-ssr/
+
+# ---- 统一建仓前归档的嵌套 git 历史（旧布局，仅本地留档）----
+.git.archived-*/
+
+# ---- SDD 计划执行工作区（ledger 等 scratch）----
+.superpowers/
+
+# ---- 本地 scratch（临时工作区 / 一次性脚本，不入库）----
+TEMP/
+_check_progress.py
+tmp_memory_smoke.py
+
+# ---- IDE / OS 杂物 ----
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
