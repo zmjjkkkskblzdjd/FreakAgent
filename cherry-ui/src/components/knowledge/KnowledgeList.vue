@@ -4,6 +4,7 @@ import Icon from '@/components/common/Icon.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import KbGrantDialog from '@/components/knowledge/KbGrantDialog.vue'
 import KbDescriptionDialog from '@/components/knowledge/KbDescriptionDialog.vue'
+import KbCreateDialog from '@/components/knowledge/KbCreateDialog.vue'
 import { useKnowledgeStore } from '@/stores/knowledge'
 
 const knowledge = useKnowledgeStore()
@@ -14,6 +15,7 @@ const renameValue = ref('')
 const deletingKb = ref(null)
 const grantsKb = ref(null)
 const descKb = ref(null)
+const createOpen = ref(false)
 
 const hint = ref('')
 let hintTimer = null
@@ -80,13 +82,18 @@ function onDescriptionSaved() {
   descKb.value = null
   showHint('描述已保存')
 }
+
+function onKbCreated() {
+  createOpen.value = false
+  showHint('知识库已创建')
+}
 </script>
 
 <template>
   <div class="knowledge-list">
     <div class="kl-head">
       <span class="title">知识库</span>
-      <button class="new-btn" title="新建知识库" @click="knowledge.newBase()">
+      <button class="new-btn" title="新建知识库" @click="createOpen = true">
         <Icon name="plus" :size="18" />
       </button>
     </div>
@@ -160,6 +167,12 @@ function onDescriptionSaved() {
       :kb="descKb"
       @close="descKb = null"
       @saved="onDescriptionSaved"
+    />
+
+    <KbCreateDialog
+      v-if="createOpen"
+      @close="createOpen = false"
+      @created="onKbCreated"
     />
 
     <transition name="hint-fade">

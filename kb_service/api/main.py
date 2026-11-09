@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS kb(
     chunk_size INTEGER NOT NULL DEFAULT 1000,
     overlap INTEGER NOT NULL DEFAULT 50,
     created_at REAL NOT NULL,
-    -- 库级描述（2026-10-28）：用户填写，供 router 的目录快照判断「库里大致有什么」。
-    -- 不能由系统自动生成：这是给模型看的人类知识，伪造比留空更危险。
-    description TEXT NOT NULL DEFAULT ''
+    description TEXT NOT NULL DEFAULT '',
+    summary_enabled INTEGER NOT NULL DEFAULT 0,
+    summary_model TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS doc(
     id TEXT PRIMARY KEY,
@@ -78,11 +78,15 @@ CREATE TABLE IF NOT EXISTS doc(
 
 
 
-def _ensure_kb_description(conn: sqlite3.Connection) -> None:
+def _ensure_kb_columns(conn: sqlite3.Connection) -> None:
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(kb)").fetchall()}
     if "description" not in cols:
         conn.execute("ALTER TABLE kb ADD COLUMN description TEXT NOT NULL DEFAULT ''")
-        conn.commit()
+    if "summary_enabled" not in cols:
+        conn.execute("ALTER TABLE kb ADD COLUMN summary_enabled INTEGER NOT NULL DEFAULT 0")
+    if "summary_model" not in cols:
+        conn.execute("ALTER TABLE kb ADD COLUMN summary_model TEXT NOT NULL DEFAULT ''")
+    conn.commit()
 
 
 def _conn() -> sqlite3.Connection:
@@ -90,7 +94,7 @@ def _conn() -> sqlite3.Connection:
     conn = sqlite3.connect(_META_DB, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.executescript(_DDL)
-    _ensure_kb_description(conn)            
+    _ensure_kb_columns(conn)            
     business_store.ensure_schema(conn)      
     row = conn.execute("SELECT id FROM kb WHERE id=?", (DEFAULT_KB_ID,)).fetchone()
     if row is None:
@@ -178,6 +182,8 @@ def _doc_dict(row: sqlite3.Row) -> dict:
 class KbIn(BaseModel):
     name: str = ""
     description: str = ""
+    summary_enabled: bool = False
+    summary_model: str = ""
 
 
 class RenameIn(BaseModel):
@@ -202,6 +208,10 @@ def list_kbs(user: AuthUser = Depends(require_user)) -> dict:
         conn.close()
     return {"kbs": [{"id": r["id"], "name": r["name"], "doc_count": r["doc_count"],
                      "description": (r["description"] if "description" in r.keys() else ""),
+                     "summary_enabled": (1 if r["summary_enabled"] else 0)
+                                         if "summary_enabled" in r.keys() else 0,
+                     "summary_model": (r["summary_model"] or "")
+                                       if "summary_model" in r.keys() else "",
                      "embedding_model": r["embedding_model"],
                      "chunk_size": r["chunk_size"], "overlap": r["overlap"],
                      "created_at": r["created_at"],
@@ -221,18 +231,33 @@ def create_kb(req: KbIn, user: AuthUser = Depends(require_user)) -> dict:
     name = (req.name or "").strip() or "未命名知识库"
     prefix = kb_id                  
     description = (req.description or "").strip()[:500]
+    summary_enabled = 1 if req.summary_enabled else 0
+    summary_model = (req.summary_model or "").strip() if summary_enabled else ""
+    if summary_enabled:
+        try:
+            provider_id, model = summary_model.split(":", 1)
+            int(provider_id)
+        except ValueError:
+            provider_id, model = "", ""
+        if not provider_id or not model.strip():
+            raise HTTPException(status_code=400,
+                                detail={"error": "invalid_summary_model",
+                                        "hint": "开启文档摘要时必须选择一个已配置的模型"})
+        summary_model = f"{int(provider_id)}:{model.strip()}"
     conn = _conn()
     try:
         conn.execute(
-            "INSERT INTO kb(id,name,collection_prefix,created_at,description)"
-            " VALUES(?,?,?,?,?)",
-            (kb_id, name, prefix, time.time(), description))
+            "INSERT INTO kb(id,name,collection_prefix,created_at,description,"
+            "summary_enabled,summary_model) VALUES(?,?,?,?,?,?,?)",
+            (kb_id, name, prefix, time.time(), description,
+             summary_enabled, summary_model))
         conn.commit()
     finally:
         conn.close()
     kb_owner.register(kb_id, user.tenant_id, user.user_id)   
     return {"id": kb_id, "name": name, "doc_count": 0, "collection_prefix": prefix,
-            "description": description}
+            "description": description, "summary_enabled": summary_enabled,
+            "summary_model": summary_model}
 
 
 @router.patch("/kbs/{kb_id}")
@@ -377,7 +402,10 @@ async def upload_doc(kb_id: str, file: UploadFile = File(...),
     finally:
         conn.close()
 
-    task = asyncio.create_task(_process_doc(kb_id, row["collection_prefix"], doc_id, name, data))
+    task = asyncio.create_task(_process_doc(
+        kb_id, row["collection_prefix"], doc_id, name, data,
+        bool(row["summary_enabled"]), (row["summary_model"] or ""),
+        int(user.tenant_id)))
     _TASKS.add(task)
     task.add_done_callback(_TASKS.discard)
     return {"id": doc_id, "name": name, "size": len(data), "status": "解析中", "chunks": 0}
@@ -472,13 +500,14 @@ def search(kb_id: str, req: SearchIn, user: AuthUser = Depends(require_user)) ->
 _TASKS: set[asyncio.Task] = set()
 
 
-def _generate_summary() -> bool:
-    import os
-    return os.getenv("KB_GENERATE_SUMMARY", "").strip().lower() in ("1", "true")
-
-
-def _build_and_add(prefix: str, documents: list[dict]) -> tuple:
-    hc = build_hierarchical_chunks(documents, generate_summary=_generate_summary())
+def _build_and_add(prefix: str, documents: list[dict], summary_enabled: bool,
+                   summary_model: str, tenant_id: int) -> tuple:
+    hc = build_hierarchical_chunks(
+        documents,
+        generate_summary=summary_enabled,
+        summary_model=summary_model,
+        tenant_id=tenant_id,
+    )
     store = _store_for_prefix(prefix)
     try:
         counts = store.add_hierarchical(
@@ -492,7 +521,8 @@ def _build_and_add(prefix: str, documents: list[dict]) -> tuple:
     return hc, counts
 
 
-async def _process_doc(kb_id: str, prefix: str, doc_id: str, name: str, data: bytes) -> None:
+async def _process_doc(kb_id: str, prefix: str, doc_id: str, name: str, data: bytes,
+                       summary_enabled: bool, summary_model: str, tenant_id: int) -> None:
     try:
         results = await parse_files([(name, data)])
         result = results[0]
@@ -506,7 +536,8 @@ async def _process_doc(kb_id: str, prefix: str, doc_id: str, name: str, data: by
         _update_doc(doc_id, status="索引中")
         documents = [{"content": markdown, "source": name,
                       "type": Path(name).suffix.lstrip(".").lower() or "txt"}]
-        hc, counts = await asyncio.to_thread(_build_and_add, prefix, documents)
+        hc, counts = await asyncio.to_thread(
+            _build_and_add, prefix, documents, summary_enabled, summary_model, tenant_id)
 
         chunk_ids = {"parents": hc.parent_ids, "children": hc.child_ids,
                      "summaries": hc.summary_ids}

@@ -141,6 +141,8 @@ def build_hierarchical_chunks(
     parent_mode: str = "paragraph",
     generate_summary: bool = True,
     summary_min_chars: int = 50,
+    summary_model: str = "",
+    tenant_id: int = 0,
 ) -> HierarchicalChunks:
     indexed_at = datetime.now().isoformat(timespec="seconds")
 
@@ -156,7 +158,8 @@ def build_hierarchical_chunks(
     summary_chunks: list[str] = []
     summary_metas: list[dict] = []
 
-    summary_gen = SummaryGenerator() if generate_summary else None
+    summary_gen = (SummaryGenerator(summary_model=summary_model, tenant_id=tenant_id)
+                   if generate_summary else None)
     total_summaries = 0
 
     for doc in documents:
@@ -264,6 +267,8 @@ def ingest_hierarchical(
     parent_mode: str = "paragraph",
     generate_summary: bool = True,
     batch_size: int = 50,
+    summary_model: str = "",
+    tenant_id: int = 0,
 ) -> dict:
     hc = build_hierarchical_chunks(
         documents,
@@ -272,6 +277,8 @@ def ingest_hierarchical(
         child_overlap=child_overlap,
         parent_mode=parent_mode,
         generate_summary=generate_summary,
+        summary_model=summary_model,
+        tenant_id=tenant_id,
     )
 
     return store.add_hierarchical(

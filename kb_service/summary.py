@@ -253,6 +253,75 @@ def _cloud_generate(prompt: str) -> str | None:
 
 
 
+def _split_model_ref(ref: str) -> tuple[int, str] | None:
+    try:
+        provider_id, model = (ref or "").split(":", 1)
+        provider_id, model = int(provider_id), model.strip()
+    except (ValueError, AttributeError):
+        return None
+    if provider_id <= 0 or not model:
+        return None
+    return provider_id, model
+
+
+def _configured_generate(prompt: str, tenant_id: int, provider_id: int, model: str) -> str | None:
+    import urllib.error
+    import urllib.request
+    try:
+        from sqlalchemy import select
+
+        from allfusion_auth.crypto import decrypt_secret
+        from allfusion_auth.db import get_engine
+        from allfusion_auth.models import model_provider
+
+        with get_engine().connect() as conn:
+            row = conn.execute(select(
+                model_provider.c.base_url,
+                model_provider.c.completions_path,
+                model_provider.c.api_key_cipher,
+                model_provider.c.key_version,
+            ).where(
+                model_provider.c.id == provider_id,
+                model_provider.c.tenant_id == tenant_id,
+                model_provider.c.enabled == 1,
+            )).first()
+        if row is None or not row.api_key_cipher:
+            return None
+        api_key = decrypt_secret(bytes(row.api_key_cipher), int(row.key_version or 1))
+        if not api_key:
+            return None
+        base = (row.base_url or "").strip().rstrip("/")
+        path = (row.completions_path or "/chat/completions").strip()
+        if not path.startswith("/"):
+            path = "/" + path
+        api_url = base + path
+    except Exception as exc:
+        logger.warning(f"摘要模型配置读取失败：{exc}")
+        return None
+
+    try:
+        payload = json.dumps({
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.3,
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            api_url,
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        content = (data["choices"][0]["message"].get("content") or "").strip()
+        return content or None
+    except Exception as exc:
+        logger.warning(f"摘要模型调用失败（{model}）：{exc}")
+        return None
+
+
 @dataclass
 class SummaryResult:
     text: str
@@ -267,9 +336,13 @@ class SummaryGenerator:
         self,
         prompt: str = DEFAULT_SUMMARY_PROMPT,
         prefer_cloud: bool = False,
+        summary_model: str = "",
+        tenant_id: int = 0,
     ):
         self.prompt = prompt
         self.prefer_cloud = prefer_cloud
+        self.summary_model = summary_model
+        self.tenant_id = tenant_id
 
 
     def generate(self, chunk_text: str, min_chars: int = 20) -> SummaryResult:
@@ -280,10 +353,21 @@ class SummaryGenerator:
         prompt = self.prompt.format(chunk_text=text)
         start = time.perf_counter()
 
+        if self.summary_model and self.tenant_id > 0:
+            ref = _split_model_ref(self.summary_model)
+            if ref is not None:
+                text = _configured_generate(prompt, self.tenant_id, ref[0], ref[1])
+                latency_ms = int((time.perf_counter() - start) * 1000)
+                if text is None:
+                    return SummaryResult(text="", model_used=f"configured_failed({ref[1]})",
+                                         latency_ms=latency_ms, success=False)
+                return SummaryResult(text=text.strip(), model_used=f"configured({ref[1]})",
+                                     latency_ms=latency_ms, success=True)
+
         result_text = None
         model_tag = "none"
 
-        if self.prefer_cloud:
+        if result_text is None and self.prefer_cloud:
             result_text = _cloud_generate(prompt)
             if result_text is not None:
                 model_tag = f"cloud({_CLOUD_MODEL})"

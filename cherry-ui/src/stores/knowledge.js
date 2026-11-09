@@ -34,6 +34,8 @@ function mapKb(k) {
     id: k.id,
     name: k.name,
     description: k.description || '',
+    summaryEnabled: !!k.summary_enabled,
+    summaryModel: k.summary_model || '',
     docCount: k.doc_count || 0,
     embeddingModel: k.embedding_model,
     chunkSize: k.chunk_size,
@@ -188,16 +190,20 @@ export const useKnowledgeStore = defineStore('knowledge', {
       }
     },
 
-    async newBase(name = '', description) {
+    async newBase(name = '', description, extra = {}) {
+      this.error = ''
       try {
-        const k = await createKb(name, description)
-        this.bases.push(mapKb({ ...k, created_at: Date.now() / 1000,
-          can_write: true, can_delete: true }))
+        const k = await createKb(name, description, extra)
+        const base = mapKb({ ...k, created_at: Date.now() / 1000,
+          can_write: true, can_delete: true })
+        this.bases.push(base)
         this.currentKbId = k.id
         this.currentDocId = null
         this.chunks = []
+        return base
       } catch (e) {
         this.error = e.message
+        return null
       }
     },
 

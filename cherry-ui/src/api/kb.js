@@ -6,8 +6,8 @@ const kb = (opts = {}) => ({ ...opts, base: KB_BASE })
 export const listKbs = () => request('/kbs', kb())
 
 
-export const createKb = (name, description) => {
-  const body = { name }
+export const createKb = (name, description, extra = {}) => {
+  const body = { name, ...extra }
   if (description !== undefined) body.description = description
   return request('/kbs', kb({ method: 'POST', body }))
 }
